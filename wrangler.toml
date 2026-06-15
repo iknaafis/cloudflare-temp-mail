@@ -13,7 +13,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "temp-mail-db"
-database_id = "PLACEHOLDER_DATABASE_ID" # Akan diperbarui pengguna setelah membuat DB via CLI
+database_id = "29435779-0897-4cf2-b11a-087d6f47db2d # Akan diperbarui pengguna setelah membuat DB via CLI
 
 # Anda dapat menambahkan variabel lingkungan (Environment Variables) kustom di sini
 [vars]
