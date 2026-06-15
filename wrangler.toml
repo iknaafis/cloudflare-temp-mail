@@ -1,0 +1,20 @@
+# Konfigurasi Wrangler untuk Cloudflare Workers & D1
+
+name = "cloudflare-temp-mail"
+main = "src/index.js"
+compatibility_date = "2024-05-02"
+
+# Folder asset statis (Frontend) yang akan di-deploy ke Cloudflare Pages/Worker Assets
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Binding Database D1 untuk menyimpan data email
+[[d1_databases]]
+binding = "DB"
+database_name = "temp-mail-db"
+database_id = "PLACEHOLDER_DATABASE_ID" # Akan diperbarui pengguna setelah membuat DB via CLI
+
+# Anda dapat menambahkan variabel lingkungan (Environment Variables) kustom di sini
+[vars]
+DOMAINS = "tempmail.anda.com, mail.anda.com" # Pisahkan dengan koma jika ada beberapa domain

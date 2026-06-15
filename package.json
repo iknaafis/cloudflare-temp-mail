@@ -1,0 +1,25 @@
+{
+  "name": "cloudflare-temp-mail",
+  "version": "1.0.0",
+  "description": "All-in-Cloudflare Temporary Email Generator Backend & Frontend",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "temp-mail",
+    "email-routing",
+    "serverless"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "postal-mime": "^2.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.57.1"
+  }
+}

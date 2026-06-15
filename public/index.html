@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InstaMail - Generator Email Sementara Serverless Premium</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+          </svg>
+        </div>
+        <span class="logo-text">Insta<span class="gradient-text">Mail</span></span>
+      </div>
+      
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span class="status-label">Cek otomatis dalam <span id="countdown">5</span>dtk</span>
+      </div>
+    </header>
+
+    <!-- Main Generator Dashboard -->
+    <section class="generator-card">
+      <div class="generator-content">
+        <label class="generator-label">Alamat Email Sementara Anda</label>
+        <div class="email-display-group">
+          <div class="email-address-wrapper">
+            <input type="text" id="email-address" readonly value="Memuat..." class="email-input">
+            <span class="secure-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Cloudflare Secured
+            </span>
+          </div>
+          <div class="action-buttons">
+            <button id="btn-copy" class="btn btn-primary" title="Salin Alamat Email">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Salin</span>
+            </button>
+            <button id="btn-qr" class="btn btn-secondary" title="Tampilkan Kode QR">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>QR Code</span>
+            </button>
+            <button id="btn-refresh" class="btn btn-secondary" title="Perbarui Inbox Sekarang">
+              <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              <span>Segarkan</span>
+            </button>
+            <button id="btn-new" class="btn btn-secondary btn-danger-hover" title="Buat Alamat Acak Baru">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span>Ganti Baru</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Custom Username Creator Toggle -->
+      <div class="custom-domain-control">
+        <button id="toggle-custom" class="link-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Ubah nama depan atau domain email kustom Anda
+        </button>
+        <div id="custom-creator" class="custom-creator-box hidden">
+          <div class="custom-fields">
+            <input type="text" id="custom-username" placeholder="nama_kustom" class="text-input">
+            <span class="at-sign">@</span>
+            <select id="custom-domain" class="select-input">
+              <!-- Domains diisi oleh JS -->
+            </select>
+            <button id="btn-apply-custom" class="btn btn-accent">Terapkan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace -->
+    <main class="mail-workspace">
+      <!-- Left Column: Inbox List & History -->
+      <aside class="left-panel">
+        <!-- Inbox Card -->
+        <div class="inbox-panel">
+          <div class="panel-header">
+            <h2>Kotak Masuk</h2>
+            <span class="badge" id="mail-count">0</span>
+          </div>
+          
+          <div class="mail-list" id="mail-list">
+            <div class="empty-state">
+              <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 12h-6l-2 3H10l-2-3H2"></path>
+                  <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                </svg>
+              </div>
+              <p>Menunggu email masuk...</p>
+              <p class="sub-text">Kirim email ke alamat di atas untuk melihatnya muncul di sini secara instan.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Card -->
+        <div class="history-panel">
+          <div class="panel-header toggle-header" id="toggle-history">
+            <h3>Riwayat Email (<span id="history-count">0</span>)</h3>
+            <svg id="history-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="history-list hidden" id="history-list">
+            <!-- Diisi oleh JS -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Column: Message View Column -->
+      <section class="reader-panel">
+        <div id="reader-empty" class="reader-placeholder">
+          <div class="placeholder-art">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <h3>Tidak Ada Email yang Dipilih</h3>
+          <p>Klik salah satu email dari kotak masuk di samping untuk membaca isinya di sini.</p>
+        </div>
+
+        <div id="reader-content" class="reader-view hidden">
+          <!-- Message Header -->
+          <div class="reader-header">
+            <div class="reader-meta-group">
+              <div class="reader-meta">
+                <h1 id="read-subject">Subject of the Email</h1>
+                <div class="sender-info">
+                  <div class="avatar" id="sender-avatar">F</div>
+                  <div class="sender-details">
+                    <div class="sender-line">
+                      <span class="from-label">Dari:</span>
+                      <span id="read-from" class="from-address">sender@example.com</span>
+                    </div>
+                    <div class="date-line">
+                      <span id="read-date">2026-06-11 16:30</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Action controls for reading mail -->
+              <div class="reader-actions">
+                <button id="btn-download-email" class="btn-action" title="Unduh Email ini">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Unduh</span>
+                </button>
+                <button id="btn-delete-email" class="btn-action btn-action-danger" title="Hapus Permanen dari Server">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  <span>Hapus</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attachments Panel -->
+          <div id="attachments-section" class="attachments-area hidden">
+            <h4>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+              Lampiran (<span id="attachments-count">0</span>)
+            </h4>
+            <div id="attachments-list" class="attachments-grid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Message Body (Sandboxed Iframe) -->
+          <div class="reader-body-wrapper">
+            <iframe id="email-iframe" name="email-iframe" sandbox="allow-popups allow-popups-to-escape-sandbox" src="about:blank"></iframe>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal QR Code -->
+  <div id="qr-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Pindai Kode QR</h3>
+        <button id="btn-close-qr" class="btn-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Gunakan kamera ponsel Anda untuk memindai email ini secara instan.</p>
+        <div class="qr-container">
+          <img id="qr-image" src="" alt="QR Code Email">
+        </div>
+        <div class="qr-email-val" id="qr-email-val">email@domain.com</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Audio Notification Controls -->
+  <div class="floating-controls">
+    <button id="btn-sound" class="btn-float active" title="Matikan Suara Notifikasi">
+      <svg id="sound-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path id="sound-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+    </button>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast" class="toast-notification hidden">Alamat email disalin ke clipboard!</div>
+
+  <!-- Script Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
