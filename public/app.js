@@ -44,6 +44,17 @@ const attachmentsSection = document.getElementById('attachments-section');
 const attachmentsCount = document.getElementById('attachments-count');
 const attachmentsList = document.getElementById('attachments-list');
 const emailIframe = document.getElementById('email-iframe');
+const emailTextView = document.getElementById('email-text-view');
+const emailTextContent = document.getElementById('email-text-content');
+const otpCard = document.getElementById('otp-card');
+const otpCodeElement = document.getElementById('otp-code');
+const btnCopyOtp = document.getElementById('btn-copy-otp');
+const tabHtml = document.getElementById('tab-html');
+const tabText = document.getElementById('tab-text');
+const btnScanOcr = document.getElementById('btn-scan-ocr');
+const ocrCard = document.getElementById('ocr-card');
+const ocrTextResult = document.getElementById('ocr-text-result');
+const btnCopyOcr = document.getElementById('btn-copy-ocr');
 const btnSound = document.getElementById('btn-sound');
 const soundIcon = document.getElementById('sound-icon');
 const soundWave = document.getElementById('sound-wave');
@@ -103,6 +114,13 @@ function setupEventListeners() {
   // Reader Actions
   btnDownloadEmail.addEventListener('click', downloadCurrentEmail);
   btnDeleteEmail.addEventListener('click', deleteCurrentEmail);
+  
+  // Tab switching and OTP copy
+  tabHtml.addEventListener('click', () => setViewMode('html'));
+  tabText.addEventListener('click', () => setViewMode('text'));
+  btnCopyOtp.addEventListener('click', copyOtpToClipboard);
+  btnScanOcr.addEventListener('click', scanImagesOcr);
+  btnCopyOcr.addEventListener('click', copyOcrToClipboard);
 }
 
 // Memuat Konfigurasi (Daftar Domain) dari Worker
@@ -504,11 +522,21 @@ function selectEmail(id) {
 
 // Mengambil Email Detail Lengkap dari Worker
 let currentFullEmailData = null; // Menyimpan data email aktif secara global
+let currentEmailImages = [];     // Menyimpan daftar gambar di email aktif untuk OCR
+let isScanningOcr = false;       // Status loading scan OCR
+
 async function viewEmail(id) {
   readerEmpty.classList.add('hidden');
   readerContent.classList.remove('hidden');
   
+  otpCard.classList.add('hidden');
+  ocrCard.classList.add('hidden');
+  btnScanOcr.classList.add('hidden');
+  setViewMode('html');
+  
   setIframeContent('<h4>Memuat konten email...</h4>', '');
+  emailTextContent.textContent = "Memuat konten email...";
+  ocrTextResult.textContent = "------";
   
   readSubject.textContent = "Memuat...";
   readFrom.textContent = "...";
@@ -516,6 +544,7 @@ async function viewEmail(id) {
   senderAvatar.textContent = "?";
   attachmentsSection.classList.add('hidden');
   currentFullEmailData = null;
+  currentEmailImages = [];
   
   try {
     const res = await fetch(`${API_BASE}/api/messages/${id}`);
@@ -542,6 +571,55 @@ async function viewEmail(id) {
       // Tulis isi pesan di sandboxed iframe
       setIframeContent(data.body_html, data.body_text);
       
+      // Tulis isi pesan di text view
+      emailTextContent.textContent = data.body_text || data.body_html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || 'Pesan ini kosong.';
+      
+      // Deteksi OTP
+      const otp = extractOTP(data.subject, data.body_html, data.body_text);
+      if (otp) {
+        otpCard.classList.remove('hidden');
+        otpCodeElement.textContent = otp;
+      } else {
+        otpCard.classList.add('hidden');
+      }
+      
+      // Deteksi Gambar untuk Fitur OCR (Gambar ke Teks)
+      // A. Cek lampiran bertipe gambar
+      if (data.attachments && data.attachments.length > 0) {
+        data.attachments.forEach((file, idx) => {
+          if (file.mimeType && file.mimeType.startsWith('image/')) {
+            currentEmailImages.push({
+              name: file.filename,
+              url: `${API_BASE}${file.downloadUrl}`
+            });
+          }
+        });
+      }
+      // B. Cek tag <img> inline di body HTML
+      if (data.body_html) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data.body_html, 'text/html');
+          const imgs = doc.querySelectorAll('img');
+          imgs.forEach((img, idx) => {
+            const src = img.getAttribute('src');
+            if (src) {
+              currentEmailImages.push({
+                name: `Gambar Inline #${idx + 1}`,
+                url: src
+              });
+            }
+          });
+        } catch (e) {
+          console.error("Gagal parsing inline images:", e);
+        }
+      }
+      
+      // Jika terdeteksi gambar, tampilkan tombol OCR
+      if (currentEmailImages.length > 0) {
+        btnScanOcr.classList.remove('hidden');
+      }
+      
       // Tampilkan Lampiran
       if (data.attachments && data.attachments.length > 0) {
         attachmentsSection.classList.remove('hidden');
@@ -554,6 +632,148 @@ async function viewEmail(id) {
   } catch (error) {
     console.error("Gagal membaca email:", error);
     setIframeContent('<h4>Gagal memuat konten email. Silakan muat ulang.</h4>', 'Klik ulang email di sebelah kiri.');
+    emailTextContent.textContent = "Gagal memuat konten email.";
+  }
+}
+
+// Mengubah Mode Tampilan Email (HTML / Teks Biasa)
+let currentViewMode = 'html';
+function setViewMode(mode) {
+  currentViewMode = mode;
+  if (mode === 'html') {
+    tabHtml.classList.add('active');
+    tabText.classList.remove('active');
+    emailIframe.classList.remove('hidden');
+    emailTextView.classList.add('hidden');
+  } else {
+    tabText.classList.add('active');
+    tabHtml.classList.remove('active');
+    emailIframe.classList.add('hidden');
+    emailTextView.classList.remove('hidden');
+  }
+}
+
+// Menyalin OTP ke Clipboard
+function copyOtpToClipboard() {
+  const code = otpCodeElement.textContent;
+  if (code && code !== '------') {
+    navigator.clipboard.writeText(code);
+    showToast(`OTP ${code} berhasil disalin!`);
+  }
+}
+
+// Mengekstrak kode OTP/Verifikasi dari Subjek atau Isi Email
+function extractOTP(subject, bodyHtml, bodyText) {
+  // Gabungkan subjek dan body text
+  const cleanHtmlText = bodyHtml ? bodyHtml.replace(/<[^>]*>/g, ' ') : '';
+  const searchText = `${subject} ${bodyText || ''} ${cleanHtmlText}`;
+  
+  // Mencari angka 4 hingga 8 digit yang berdiri sendiri
+  const matches = searchText.match(/\b\d{4,8}\b/g);
+  if (matches) {
+    // Saring angka tahun (seperti 2024-2030) agar tidak terdeteksi sebagai OTP
+    const filtered = matches.filter(num => {
+      const val = parseInt(num, 10);
+      if (val >= 2020 && val <= 2030) return false;
+      return true;
+    });
+    
+    if (filtered.length > 0) {
+      return filtered[0];
+    }
+  }
+  
+  // Deteksi format terpisah spasi/strip seperti "123-456" atau "123 456"
+  const spacedMatches = searchText.match(/\b\d{3}[-\s]\d{3}\b/g);
+  if (spacedMatches) {
+    return spacedMatches[0];
+  }
+  
+  return null;
+}
+
+// Memindai Teks dari Gambar yang Terdeteksi menggunakan Tesseract OCR
+async function scanImagesOcr() {
+  if (currentEmailImages.length === 0 || isScanningOcr) return;
+  
+  isScanningOcr = true;
+  btnScanOcr.disabled = true;
+  const originalHtml = btnScanOcr.innerHTML;
+  btnScanOcr.innerHTML = `
+    <svg class="spin" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+    <span>Memindai...</span>
+  `;
+  
+  showToast("Memulai pemindaian gambar (OCR)...");
+  
+  let ocrResults = [];
+  
+  try {
+    // Pastikan library Tesseract tersedia
+    if (typeof Tesseract === 'undefined') {
+      throw new Error("Library Tesseract.js belum dimuat. Silakan muat ulang halaman.");
+    }
+    
+    for (let i = 0; i < currentEmailImages.length; i++) {
+      const img = currentEmailImages[i];
+      showToast(`Memproses ${img.name}... (${i+1}/${currentEmailImages.length})`);
+      
+      let targetUrl = img.url;
+      // Normalisasi path API relatif ke domain saat ini untuk menghindari CORS
+      if (targetUrl.startsWith('/')) {
+        targetUrl = window.location.origin + targetUrl;
+      }
+      
+      const res = await Tesseract.recognize(
+        targetUrl,
+        'eng+ind', // gunakan bahasa inggris dan indonesia
+        { logger: m => console.log(`OCR [${img.name}]:`, m.status, Math.round(m.progress * 100) + "%") }
+      );
+      
+      if (res && res.data && res.data.text) {
+        ocrResults.push(`[Gambar: ${img.name}]\n${res.data.text.trim()}`);
+      }
+    }
+    
+    if (ocrResults.length > 0) {
+      const combinedText = ocrResults.join("\n\n");
+      ocrCard.classList.remove('hidden');
+      ocrTextResult.textContent = combinedText;
+      
+      // Tambahkan ke plain-text content
+      emailTextContent.textContent = `${emailTextContent.textContent}\n\n=== HASIL EKSTRAKSI TEXT DARI GAMBAR (OCR) ===\n${combinedText}`;
+      
+      // Deteksi OTP dari teks hasil OCR
+      const extractedOtp = extractOTP("Hasil OCR", "", combinedText);
+      if (extractedOtp) {
+        otpCard.classList.remove('hidden');
+        otpCodeElement.textContent = extractedOtp;
+        showToast(`Sukses! OTP ${extractedOtp} terdeteksi di dalam gambar!`);
+      } else {
+        showToast("Ekstraksi teks selesai, tidak ada OTP terdeteksi.");
+      }
+      
+      // Pindahkan tampilan ke "Teks Biasa" agar hasil terlihat
+      setViewMode('text');
+    } else {
+      showToast("Tidak ada teks yang terdeteksi dari gambar.");
+    }
+  } catch (err) {
+    console.error("Kesalahan OCR:", err);
+    showToast(err.message || "Gagal mengekstrak teks dari gambar.");
+  } finally {
+    isScanningOcr = false;
+    btnScanOcr.disabled = false;
+    btnScanOcr.innerHTML = originalHtml;
+  }
+}
+
+// Menyalin hasil OCR ke clipboard
+function copyOcrToClipboard() {
+  const text = ocrTextResult.textContent;
+  if (text && text !== '------') {
+    navigator.clipboard.writeText(text);
+    showToast("Hasil OCR berhasil disalin!");
   }
 }
 
@@ -603,7 +823,7 @@ function setIframeContent(html, text) {
         </style>
       </head>
       <body>
-         ${innerBody}
+        ${innerBody}
       </body>
     </html>
   `;

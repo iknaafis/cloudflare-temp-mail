@@ -9,7 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <!-- Tesseract OCR Library -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -154,6 +156,10 @@
               </div>
               <!-- Action controls for reading mail -->
               <div class="reader-actions">
+                <button id="btn-scan-ocr" class="btn-action hidden" title="Pindai gambar di email untuk menemukan teks/OTP">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  <span>Pindai Gambar (OCR)</span>
+                </button>
                 <button id="btn-download-email" class="btn-action" title="Unduh Email ini">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                   <span>Unduh</span>
@@ -163,6 +169,49 @@
                   <span>Hapus</span>
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- View Options and OTP Banner -->
+          <div class="reader-sub-header">
+            <!-- OTP Banner -->
+            <div id="otp-card" class="otp-card hidden">
+              <div class="otp-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="otp-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span class="otp-label">Kode OTP Terdeteksi:</span>
+                <span id="otp-code" class="otp-code">------</span>
+              </div>
+              <button id="btn-copy-otp" class="btn-otp-copy" title="Salin OTP">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Salin
+              </button>
+            </div>
+
+            <!-- OCR Result Card -->
+            <div id="ocr-card" class="ocr-card hidden">
+              <div class="ocr-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ocr-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <div class="ocr-text-group">
+                  <span class="ocr-label">Teks Hasil Ekstraksi Gambar (OCR):</span>
+                  <div id="ocr-text-result" class="ocr-result-content">------</div>
+                </div>
+              </div>
+              <button id="btn-copy-ocr" class="btn-otp-copy" title="Salin Hasil OCR">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Salin
+              </button>
+            </div>
+
+            <!-- HTML / Text View Tabs -->
+            <div class="view-tabs">
+              <button id="tab-html" class="tab-btn active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                HTML
+              </button>
+              <button id="tab-text" class="tab-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Teks Biasa
+              </button>
             </div>
           </div>
 
@@ -177,9 +226,12 @@
             </div>
           </div>
 
-          <!-- Message Body (Sandboxed Iframe) -->
+          <!-- Message Body (Sandboxed Iframe & Plain Text View) -->
           <div class="reader-body-wrapper">
             <iframe id="email-iframe" name="email-iframe" sandbox="allow-popups allow-popups-to-escape-sandbox" src="about:blank"></iframe>
+            <div id="email-text-view" class="email-text-view hidden">
+              <pre id="email-text-content"></pre>
+            </div>
           </div>
         </div>
       </section>
@@ -216,6 +268,6 @@
   <div id="toast" class="toast-notification hidden">Alamat email disalin ke clipboard!</div>
 
   <!-- Script Logic -->
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
