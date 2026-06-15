@@ -18,3 +18,6 @@ database_id = "b2a09445-4065-4cb9-977d-dd9254d9aecf" # Akan diperbarui pengguna 
 # Anda dapat menambahkan variabel lingkungan (Environment Variables) kustom di sini
 [vars]
 DOMAINS = "nustroe.qzz.io" # Pisahkan dengan koma jika ada beberapa domain
+
+[observability]
+enabled = false
