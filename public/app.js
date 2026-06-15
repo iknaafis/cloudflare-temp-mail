@@ -559,7 +559,14 @@ async function viewEmail(id) {
 
 // Menulis Konten ke Iframe Sandboxed dengan Aman
 function setIframeContent(html, text) {
-  const content = html || text || '<em style="color: #64748b; font-style: italic;">Pesan ini kosong.</em>';
+  let innerBody = '';
+  if (html) {
+    innerBody = html;
+  } else if (text) {
+    innerBody = `<pre>${text}</pre>`;
+  } else {
+    innerBody = '<em style="color: #64748b; font-style: italic;">Pesan ini kosong.</em>';
+  }
   
   const srcdocHtml = `
     <!DOCTYPE html>
@@ -596,7 +603,7 @@ function setIframeContent(html, text) {
         </style>
       </head>
       <body>
-        ${html ? html : `<pre>${text}</pre>`}
+         ${innerBody}
       </body>
     </html>
   `;
