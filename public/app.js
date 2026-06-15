@@ -561,9 +561,7 @@ async function viewEmail(id) {
 function setIframeContent(html, text) {
   const content = html || text || '<em style="color: #64748b; font-style: italic;">Pesan ini kosong.</em>';
   
-  const iframeDoc = emailIframe.contentDocument || emailIframe.contentWindow.document;
-  iframeDoc.open();
-  iframeDoc.write(`
+  const srcdocHtml = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -601,8 +599,9 @@ function setIframeContent(html, text) {
         ${html ? html : `<pre>${text}</pre>`}
       </body>
     </html>
-  `);
-  iframeDoc.close();
+  `;
+  
+  emailIframe.srcdoc = srcdocHtml;
 }
 
 // Menampilkan Lampiran
