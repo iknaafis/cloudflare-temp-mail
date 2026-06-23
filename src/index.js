@@ -16,7 +16,7 @@ export default {
 
       const id = crypto.randomUUID();
       const address = message.to.toLowerCase().trim();
-      const sender = message.from.toLowerCase().trim();
+      const sender = (email.from && email.from.address) ? email.from.address.toLowerCase().trim() : message.from.toLowerCase().trim();
       const senderName = email.from.name || '';
       const subject = email.subject || '(Tidak ada subjek)';
       const bodyHtml = email.html || '';
