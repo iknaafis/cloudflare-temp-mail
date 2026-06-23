@@ -554,7 +554,11 @@ async function viewEmail(id) {
       
       // Update UI Header
       readSubject.textContent = data.subject || '(Tidak ada subjek)';
-      readFrom.textContent = data.sender_name ? `${data.sender_name} <${data.sender}>` : data.sender;
+      if (data.sender_name) {
+        readFrom.innerHTML = `<span class="sender-display-name">${data.sender_name}</span> <span class="sender-email-address" title="${data.sender}">&lt;${data.sender}&gt;</span>`;
+      } else {
+        readFrom.innerHTML = `<span class="sender-email-address" title="${data.sender}">${data.sender}</span>`;
+      }
       
       // Format Tanggal
       try {
