@@ -173,8 +173,14 @@ function createNewRandomMailbox() {
     randomUser += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   
-  // Pilih domain pertama
-  const domain = activeDomains[0];
+  // Gunakan domain yang sedang digunakan saat ini (jika ada), jika tidak gunakan domain pertama
+  let domain = activeDomains[0];
+  if (currentEmail && currentEmail.includes('@')) {
+    const currentDomain = currentEmail.split('@')[1];
+    if (activeDomains.includes(currentDomain)) {
+      domain = currentDomain;
+    }
+  }
   currentEmail = `${randomUser}@${domain}`;
   
   // Simpan email aktif
